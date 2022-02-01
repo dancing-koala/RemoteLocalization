@@ -31,7 +31,7 @@ application {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt'
 
     def okHttpVersion = "4.9.3"
     implementation("com.squareup.okhttp3:okhttp:$okHttpVersion")

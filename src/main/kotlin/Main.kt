@@ -60,9 +60,15 @@ class GenerateLocalizationFiles : CliktCommand() {
         val translationsByLanguages = mutableMapOf<String, List<Translation>>()
 
         Language.values().forEach { language ->
-            translationsByLanguages[language.code] = columns.map {
+            translationsByLanguages[language.code] = columns.mapNotNull {
+                val name = it[COLUMN_NAME]!!
+
+                if(name.isBlank()) {
+                    return@mapNotNull null
+                }
+
                 Translation(
-                    name = it[COLUMN_NAME]!!,
+                    name = name,
                     comment = it[COLUMN_COMMENT]!!,
                     value = it[language.columnName]?.trim() ?: ""
                 )
