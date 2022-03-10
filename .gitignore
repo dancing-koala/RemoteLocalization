@@ -97,3 +97,7 @@ fabric.properties
 # Projet
 gen
 build
+trash
+
+# Gradle
+.gradle
