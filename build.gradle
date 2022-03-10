@@ -37,9 +37,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:$okHttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okHttpVersion")
 
-    implementation "org.slf4j:slf4j-simple:1.7.32"
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
 
     implementation "com.github.doyaaaaaken:kotlin-csv-jvm:1.2.0"
 
-    implementation "com.github.ajalt.clikt:clikt:3.3.0"
+    implementation 'com.github.ajalt.clikt:clikt:3.4.0'
 }
