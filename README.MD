@@ -18,33 +18,33 @@ Unzip `RemoteLocalization-<VERSION>.zip` & put it anywhere you would install any
 Usage: generate-localization-files [OPTIONS]
 
 Options:
-  --url               URL of the csv file to parse
-  --android           Generate localization files for Android
-  --ios               Generate localization files for iOs
+  --url TEXT          URL of the csv file to parse
+  --target TEXT       APP or SDK
   --android-dir PATH  Target directory for Android files
   --ios-dir PATH      Target directory for iOs files
   -h, --help          Show this message and exit
-
 ```
 
 ### Examples
 
-Generate android files in current working directory:
+Generate android files for APP target directly in project directory:
 
-`$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --android --url https://your.url.com/csv`
+```
+$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --target=APP --android-dir=/path/to/android/project/app/src/main/res --url https://your.url.com/csv
+ ```
 
-Generate android files directly in project directory:
+Generate ios files for SDK directly in project directory:
 
-`$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --android --android-dir=/path/to/android/project/app/src/main/res --url https://your.url.com/csv`
+```
+$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --target=SDK --ios-dir=/path/to/ios/project/tchek/resources --url https://your.url.com/csv
+```
 
+Generate android & ios files for APP target directly in project directory:
 
-Generate ios files in current working directory:
+```
+$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --target=APP --android-dir=/path/to/android/project/app/src/main/res --ios-dir=/path/to/ios/project/tchek/resources --url https://your.url.com/csv
+ ```
 
-`$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --ios --url https://your.url.com/csv`
-
-Generate ios files directly in project directory:
-
-`$ /path/to/dir/RemoteLocalization/bin/RemoteLocalization --ios --ios-dir=/path/to/ios/project/tchek/resources --url https://your.url.com/csv`
 
 ## Tips
 
@@ -52,7 +52,7 @@ Generate ios files directly in project directory:
 
 Add an alias into your .bashrc or .zshrc file:
 
-`alias update_ios_translation="/path/to/dir/RemoteLocalization/bin/RemoteLocalization --ios --ios-dir=/path/to/ios/project/tchek/resources" --url https://your.url.com/csv`
+`alias update_ios_translation="/path/to/dir/RemoteLocalization/bin/RemoteLocalization --target=APP --ios-dir=/path/to/ios/project/tchek/resources" --url https://your.url.com/csv`
 
 Then logout/login or source the .bashrc or .zshrc file:
 
