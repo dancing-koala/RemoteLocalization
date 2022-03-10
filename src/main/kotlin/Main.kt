@@ -1,6 +1,4 @@
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
@@ -9,12 +7,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.FileOutputStream
-import java.nio.file.Paths
 
 typealias TranslationData = Map<String, List<Translation>>
 
 private const val COLUMN_NAME = "Asset ID"
 private const val COLUMN_COMMENT = "Comment"
+private const val COLUMN_TARGET = "Target"
 
 fun main(args: Array<String>) {
     GenerateLocalizationFiles().main(args)
@@ -22,21 +20,27 @@ fun main(args: Array<String>) {
 
 class GenerateLocalizationFiles : CliktCommand() {
 
-    private val currentWorkingDirectory = Paths.get("").toFile()
-
-    private val android: Boolean by option(help = "Generate localization files for Android").flag()
-    private val ios: Boolean by option(help = "Generate localization files for iOs").flag()
     private val url: String by option(help = "URL of the csv file to parse").required()
+    private val target: String by option(help = "APP or SDK").required()
 
     private val androidDir by option(help = "Target directory for Android files")
-        .file(mustExist = true, canBeDir = true, canBeFile = false).default(currentWorkingDirectory)
+        .file(mustExist = true, canBeDir = true, canBeFile = false)
 
     private val iosDir by option(help = "Target directory for iOs files")
-        .file(mustExist = true, canBeDir = true, canBeFile = false).default(currentWorkingDirectory)
+        .file(mustExist = true, canBeDir = true, canBeFile = false)
+
+    //https://docs.google.com/spreadsheets/d/e/2PACX-1vRjk-tpilmJCu39AbDevK8l4yaqyswXrh-jnjfR0bqSkEmJwKjxQtsjB3mShlvl8VIpUvirzHDs0TSS/pub?output=csv
 
     override fun run() {
-        if (!android && !ios) {
-            println("Nothind to do, exiting! Good bye :)")
+        if (androidDir == null && iosDir == null) {
+            println("Nothing to do, exiting! Good bye :)")
+            return
+        }
+
+        val upperCaseTarget = target.uppercase()
+
+        if (upperCaseTarget != "APP" && upperCaseTarget != "SDK") {
+            println("Error: Target [$target] is not valid !")
             return
         }
 
@@ -46,24 +50,30 @@ class GenerateLocalizationFiles : CliktCommand() {
             .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.NONE })
             .build()
 
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request = Request.Builder().url(url).build()
 
         val response = okHttpClient.newCall(request).execute()
 
         val bodyInputStream = response.body?.byteStream()
             ?: throw IllegalArgumentException("body is null")
 
-        val columns = csvReader().readAllWithHeader(bodyInputStream)
+        val columns = csvReader()
+            .readAllWithHeader(bodyInputStream)
 
         val translationsByLanguages = mutableMapOf<String, List<Translation>>()
 
+
         Language.values().forEach { language ->
             translationsByLanguages[language.code] = columns.mapNotNull {
+                val targets = it[COLUMN_TARGET]!!
+
+                if (!targets.contains(target)) {
+                    return@mapNotNull null
+                }
+
                 val name = it[COLUMN_NAME]!!
 
-                if(name.isBlank()) {
+                if (name.isBlank()) {
                     return@mapNotNull null
                 }
 
@@ -75,22 +85,22 @@ class GenerateLocalizationFiles : CliktCommand() {
             }
         }
 
-        if (android) {
+        androidDir?.let {
             writeFiles(
-                localizableFileWriter = AndroidLocalizableFileWriter(outDirFile = androidDir, defaultLanguage = Language.EN),
+                localizableFileWriter = AndroidLocalizableFileWriter(outDirFile = it, defaultLanguage = Language.EN),
                 data = translationsByLanguages
             )
 
-            println("Files generated for android in [$androidDir] !")
+            println("Files generated for android in [$it] !")
         }
 
-        if (ios) {
+        iosDir?.let {
             writeFiles(
-                localizableFileWriter = IosLocalizableFileWriter(outDirFile = iosDir),
+                localizableFileWriter = IosLocalizableFileWriter(outDirFile = it),
                 data = translationsByLanguages
             )
 
-            println("Files generated for ios in [$iosDir] !")
+            println("Files generated for ios in [$it] !")
         }
 
         println("Done! Took ${System.currentTimeMillis() - start}ms")
